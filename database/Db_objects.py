@@ -39,7 +39,7 @@ class Payment(Base):
     __tablename__ = 'Payment'
     id_payment: Mapped[int] = mapped_column(primary_key=True)
     amount: Mapped[str]
-    id_payment_status: Mapped[int] = mapped_column(ForeignKey("Payment_status.id_client"))
+    id_payment_status: Mapped[int] = mapped_column(ForeignKey("Payment_status.id_payment_status"))
     requests: Mapped[List["Request"]] = relationship()
 
 
@@ -72,8 +72,8 @@ class Request(Base):
     id_request_status: Mapped[int] = mapped_column(ForeignKey("Request_status.id_request_status"))
     id_contract: Mapped[int] = mapped_column(ForeignKey("Contract.id_contract"))
     id_payment: Mapped[int] = mapped_column(ForeignKey("Payment.id_payment"))
-    id_lawyer: Mapped[int] = mapped_column(ForeignKey("Payment.id_lawyer"))
-    production_sheet: Mapped["ProductionSheet"] = relationship(back_populates="parent")
+    id_lawyer: Mapped[int] = mapped_column(ForeignKey("Lawyer.id_lawyer"))
+    production_sheet: Mapped["ProductionSheet"] = relationship(back_populates="request")
 
 
 class ProductionStatus(Base):
@@ -89,8 +89,7 @@ class ProductionSheet(Base):
     name: Mapped[str]
     id_production_status: Mapped[int] = mapped_column(ForeignKey("Production_status.id_production_status"))
     request_id: Mapped[int] = mapped_column(ForeignKey("Request.id_request"))
-    request: Mapped["Request"] = relationship(back_populates="child")
-    production_steps_in_sheet: Mapped[List["ProductionStepsInSheet"]] = relationship(back_populates="parent")
+    request: Mapped["Request"] = relationship(back_populates="production_sheet")
 
 
 class Competence(Base):
@@ -122,7 +121,7 @@ class Equipment(Base):
     id_equipment: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     resource: Mapped[str]
-    production_steps_in_sheet: Mapped["EquipmentParameters"] = relationship(back_populates="parent")
+    production_steps: Mapped[List["ProductionStep"]] = relationship()
 
 
 class EquipmentParameters(Base):
@@ -139,9 +138,9 @@ class ProductionStep(Base):
     id_production_step: Mapped[int] = mapped_column(primary_key=True)
     data_time: Mapped[str]
     log: Mapped[str]
-    id_equipment: Mapped["Equipment"] = relationship()
+    id_equipment: Mapped[int] = mapped_column(ForeignKey("Equipment.id_equipment"))
     id_brewer: Mapped[int] = mapped_column(ForeignKey("Brewer.id_brewer"))
-    id_spoilage: Mapped[List["Spoilage"]] = relationship(back_populates="parent")
+    spoilages: Mapped[List["Spoilage"]] = relationship()
     id_production_steps_in_sheet: Mapped[int] = mapped_column(ForeignKey("Production_steps_in_sheet"
                                                                          ".id_production_steps_in_sheet"))
 
@@ -150,7 +149,7 @@ class ProductionStepsInSheet(Base):
     __tablename__ = 'Production_steps_in_sheet'
     id_production_steps_in_sheet: Mapped[int] = mapped_column(primary_key=True)
     id_production_sheet: Mapped[int] = mapped_column(ForeignKey("Production_sheet.id_production_sheet"))
-    production_steps: Mapped[List["ProductionStep"]] = relationship(back_populates="parent")
+    production_steps: Mapped[List["ProductionStep"]] = mapped_column(ForeignKey("ProductionStep.id_production_step"))
 
 
 class Spoilage(Base):

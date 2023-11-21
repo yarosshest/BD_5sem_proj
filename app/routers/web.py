@@ -9,6 +9,7 @@ from starlette.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 
 from app.models.Message import Message
+from database.Db_objects import Client
 from database.async_db import DataBase as Db
 from database.async_db import db as db_ins
 
@@ -26,72 +27,90 @@ templates = Jinja2Templates(directory=script_dir)
 
 
 @router.get("/", response_class=HTMLResponse)
-async def edit_post_get(request: Request):
+async def get_main_page(request: Request):
     return templates.TemplateResponse("home_page.html", {
         "request": request,
     })
 
 
-@router.get("/addPost", response_class=HTMLResponse)
-async def add_post_get(request: Request):
-    return templates.TemplateResponse("add_post.html", {
+@router.get("/clients", response_class=HTMLResponse)
+async def get_client_page(request: Request, db: Db = Depends(db_ins)):
+    clients = await db.get_clients()
+
+    return templates.TemplateResponse("client_page.html", {
         "request": request,
+        "col": ["id клиента", "ФИО", "ИНН", "Телефон"],
+        "clients": clients
     })
 
 
-@router.get("/editPost/{post_id}",
-            responses={
-                404: {"model": Message, "description": "Not found"}},
-            response_class=HTMLResponse)
-async def edit_post_get(request: Request, post_id: int, db: Db = Depends(db_ins)):
-    post = await db.get_post(post_id)
-    if post is not None:
-        return templates.TemplateResponse("edit_post.html", {
-            "request": request,
-            "post": post
-        })
-    else:
-        return JSONResponse(status_code=404, content={"message": "Not found"})
+@router.post("/client/add", response_class=RedirectResponse, status_code=302)
+async def add_client(fio: Annotated[str, Form()],
+                     inn: Annotated[str, Form()],
+                     phone: Annotated[str, Form()],
+                     db: Db = Depends(db_ins)):
+    await db.add_client(fio, inn, phone)
+
+    return "/web/clients"
 
 
-@router.get("/posts", response_class=HTMLResponse)
-async def posts_page(request: Request, db: Db = Depends(db_ins)):
-    posts = await db.get_posts()
-    posts = list(posts)
-    return templates.TemplateResponse("main_page.html", {
+@router.post("/dell/client/{id_client}", response_class=RedirectResponse, status_code=302)
+async def dell_client(id_client: int,
+                      db: Db = Depends(db_ins)):
+    await db.dell_client(id_client)
+
+    return "/web/clients"
+
+
+@router.post("/client/edit", response_class=RedirectResponse, status_code=302)
+async def edit_client(
+        id: Annotated[int, Form()],
+        fio: Annotated[str, Form()],
+        inn: Annotated[str, Form()],
+        phone: Annotated[str, Form()],
+        db: Db = Depends(db_ins)):
+    await db.edit_client(id, fio, inn, phone)
+
+    return "/web/clients"
+
+
+@router.get("/lawyer", response_class=HTMLResponse)
+async def get_client_page(request: Request, db: Db = Depends(db_ins)):
+    lawyers = await db.get_lawyers()
+
+    return templates.TemplateResponse("lawyer_page.html", {
         "request": request,
-        "posts": posts
+        "col": ["id_lawyer", "FIO", "salary"],
+        "colRu": ["id клиента", "ФИО", "Зарплата"],
+        "items": lawyers
     })
 
 
-@router.get("/register", response_class=HTMLResponse)
-async def register_page_get(request: Request):
-    return templates.TemplateResponse("register_page.html", {
-        "request": request
-    })
+@router.post("/client/add", response_class=RedirectResponse, status_code=302)
+async def add_client(fio: Annotated[str, Form()],
+                     inn: Annotated[str, Form()],
+                     phone: Annotated[str, Form()],
+                     db: Db = Depends(db_ins)):
+    await db.add_client(fio, inn, phone)
+
+    return "/web/clients"
 
 
-@router.post("/like/{post_id}",
-             responses={
-                 202: {"model": Message, "description": "ok"},
-                 404: {"model": Message, "description": "Not found"}}
-             )
-async def like_post(post_id: int, db: Db = Depends(db_ins)):
-    res = await db.like_post(post_id)
-    if res:
-        return JSONResponse(status_code=202, content={"message": "ok"})
-    else:
-        return JSONResponse(status_code=404, content={"message": "Not found"})
+@router.post("/dell/client/{id_client}", response_class=RedirectResponse, status_code=302)
+async def dell_client(id_client: int,
+                      db: Db = Depends(db_ins)):
+    await db.dell_client(id_client)
+
+    return "/web/clients"
 
 
-@router.post("/dislike/{post_id}",
-             responses={
-                 202: {"model": Message, "description": "ok"},
-                 404: {"model": Message, "description": "Not found"}}
-             )
-async def dislike_post(post_id: int, db: Db = Depends(db_ins)):
-    res = await db.dislike_post(post_id)
-    if res:
-        return JSONResponse(status_code=202, content={"message": "ok"})
-    else:
-        return JSONResponse(status_code=404, content={"message": "Not found"})
+@router.post("/client/edit", response_class=RedirectResponse, status_code=302)
+async def edit_client(
+        id: Annotated[int, Form()],
+        fio: Annotated[str, Form()],
+        inn: Annotated[str, Form()],
+        phone: Annotated[str, Form()],
+        db: Db = Depends(db_ins)):
+    await db.edit_client(id, fio, inn, phone)
+
+    return "/web/clients"
