@@ -120,7 +120,7 @@ class DataBase:
             await session.commit()
             await session.close()
 
-    async def get_lawyers(self) -> List[Lawyer]:
+    async def get_lawyers(self) -> List[dict]:
         session = await self.get_session()
         try:
             q = select(Lawyer)
@@ -128,9 +128,49 @@ class DataBase:
             res = []
             for i in lawyers:
                 session.expunge(i)
-                res.append(i)
+                res.append(i.__dict__)
             return res
         finally:
+            await session.close()
+
+    async def add_lawyer(self, fio: str, salary: str):
+        session = await self.get_session()
+        try:
+            lawyer = Lawyer(FIO=fio, salary=salary)
+            session.add(lawyer)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_lawyer(self, id_lawyer: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Lawyer).where(Lawyer.id_lawyer == id_lawyer)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_lawyer(self, id: int, fio: str, salary: str) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Lawyer).where(Lawyer.id_lawyer == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.FIO = fio
+                item.salary = salary
+                return True
+        finally:
+            await session.commit()
             await session.close()
 
 

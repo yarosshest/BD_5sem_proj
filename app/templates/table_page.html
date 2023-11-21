@@ -24,8 +24,9 @@
             <th scope="col">
                 <img src="{{ url_for('static', path='img/dell.png') }}" alt="My Profile" height="30">
             </th>
-            {% for col in colRu %}
-                <th scope="col">col</th>
+            <th scope="col">{{colIdRu}}</th>
+            {% for ru in colRu %}
+            <th scope="col">{{ru}}</th>
             {% endfor %}
             <th scope="col">
                 <img src="{{ url_for('static', path='img/edit.png') }}" alt="My Profile" height="30">
@@ -33,24 +34,25 @@
         </tr>
         </thead>
         <tbody>
-        {% for lawyer in lawyers %}
+        {% for item in items %}
         <tr>
             <td>
-                <button type="button" class="btn btn-primary btn-dell" data-id="{{ client.id_client }}"
-                        data-name="client">
+                <button type="button" class="btn btn-primary btn-dell" data-id="{{item[colId]}}"
+                        data-name={{name}}>
                     <img src="{{ url_for('static', path='img/dell.png') }}" height="30" alt="Delete">
                 </button>
             </td>
-            <th scope="col">{{lawyer.id_lawyer}}
-            </th>
-            <td>{{lawyer.FIO}}</td>
-            <td>{{lawyer.salary}}</td>
+            <th scope="col">{{item[colId]}}</th>
+            {% for c in col %}
+            <td scope="col">{{item[c]}}</td>
+            {% endfor %}
             <td>
                 <button type="button" class="btn btn-primary btn-edit edit-dialog"
-                        data-id="{{lawyer.id_lawyer }}"
-                        data-fio="{{lawyer.FIO}}"
-                        data-salary="{{lawyer.salary}}"
-                        data-name="lawyer" data-bs-toggle="modal" data-bs-target="#editModal">
+                        data-id="{{item[colId]}}"
+                        {% for c in col %}
+                        data-{{c}}="{{item[c]}}"
+                        {% endfor %}
+                        data-name={{name}} data-bs-toggle="modal" data-bs-target="#editModal">
                     <img src="{{ url_for('static', path='img/edit.png') }}" height="30" alt="Delete">
                 </button>
             </td>
@@ -75,30 +77,16 @@
                 <div class="modal-body">
                     <div class="container mt-4">
                         <div class="card mx-auto" style="width: 18rem;">
-                            <form method="POST" action="client/add">
+                            <form method="POST" action="add">
+                                {% for num_col in range(colRu|length) %}
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text" id="inputGroup-fio">ФИО</span>
+                                        <span class="input-group-text" id="inputGroup-{{col[num_col]}}">{{colRu[num_col]}}</span>
                                     </div>
-                                    <input name="fio" type="text" class="form-control" aria-label="Default"
+                                    <input name="{{col[num_col]}}" type="text" class="form-control" aria-label="Default"
                                            aria-describedby="inputGroup-sizing-default">
                                 </div>
-
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="inputGroup-inn">	ИНН</span>
-                                    </div>
-                                    <input name="inn" type="text" class="form-control" aria-label="Default"
-                                           aria-describedby="inputGroup-sizing-default">
-                                </div>
-
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="inputGroup-phone">	Телефон</span>
-                                    </div>
-                                    <input name="phone" type="text" class="form-control" aria-label="Default"
-                                           aria-describedby="inputGroup-sizing-default">
-                                </div>
+                                {% endfor %}
 
                                 <div class="col-md-12 text-center mt-3">
                                     <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Создать
@@ -122,40 +110,26 @@
                 <div class="modal-body">
                     <div class="container mt-4">
                         <div class="card mx-auto" style="width: 18rem;">
-                            <form method="POST" action="client/edit">
+                            <form method="POST" action="edit">
 
                                 <div class="input-group mb-3 visually-hidden">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text" id="editGroup-id">ФИО</span>
+                                        <span class="input-group-text" id="editGroup-id"></span>
                                     </div>
                                     <input name="id" id="id" type="number" class="form-control visually-hidden"
                                            aria-label="Default"
                                            aria-describedby="inputGroup-sizing-default">
                                 </div>
 
+                                {% for num_col in range(colRu|length) %}
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text" id="editGroup-fio">ФИО</span>
+                                        <span class="input-group-text" id="editGroup-{{col[num_col]}}">{{colRu[num_col]}}</span>
                                     </div>
-                                    <input name="fio" id="fio" type="text" class="form-control" aria-label="Default"
+                                    <input name="{{col[num_col]}}"  id="{{col[num_col]}}" type="text" class="form-control" aria-label="Default"
                                            aria-describedby="inputGroup-sizing-default">
                                 </div>
-
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="editGroup-inn">	ИНН</span>
-                                    </div>
-                                    <input name="inn" id="inn" type="text" class="form-control" aria-label="Default"
-                                           aria-describedby="inputGroup-sizing-default">
-                                </div>
-
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text" id="editGroup-phone">	Телефон</span>
-                                    </div>
-                                    <input name="phone" id="phone" type="text" aria-label="Default"
-                                           aria-describedby="inputGroup-sizing-default">
-                                </div>
+                                {% endfor %}
 
                                 <div class="col-md-12 text-center mt-3">
                                     <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Создать
@@ -179,11 +153,10 @@
         var id = $(this).data('id');
         $(".modal-body #id").val( id );
 
-        var fio = $(this).data('fio');
-        $(".modal-body #fio").val( fio );
-
-        var inn = $(this).data('inn');
-        $(".modal-body #inn").val( inn );
+        {% for c in col %}
+        var {{c}} = $(this).data('{{c.lower()}}');
+        $(".modal-body #{{c}}").val( {{c}} );
+        {% endfor %}
     });
 </script>
 

@@ -12,6 +12,7 @@ from app.models.Message import Message
 from database.Db_objects import Client
 from database.async_db import DataBase as Db
 from database.async_db import db as db_ins
+from app.routers.tables.client import router as client
 
 from pathlib import Path
 
@@ -20,6 +21,8 @@ router = APIRouter(
     tags=["web"],
 
 )
+
+router.include_router(client)
 
 script_dir = Path(__file__).parent.parent.joinpath("templates/")
 
@@ -33,84 +36,44 @@ async def get_main_page(request: Request):
     })
 
 
-@router.get("/clients", response_class=HTMLResponse)
-async def get_client_page(request: Request, db: Db = Depends(db_ins)):
-    clients = await db.get_clients()
-
-    return templates.TemplateResponse("client_page.html", {
-        "request": request,
-        "col": ["id клиента", "ФИО", "ИНН", "Телефон"],
-        "clients": clients
-    })
-
-
-@router.post("/client/add", response_class=RedirectResponse, status_code=302)
-async def add_client(fio: Annotated[str, Form()],
-                     inn: Annotated[str, Form()],
-                     phone: Annotated[str, Form()],
-                     db: Db = Depends(db_ins)):
-    await db.add_client(fio, inn, phone)
-
-    return "/web/clients"
-
-
-@router.post("/dell/client/{id_client}", response_class=RedirectResponse, status_code=302)
-async def dell_client(id_client: int,
-                      db: Db = Depends(db_ins)):
-    await db.dell_client(id_client)
-
-    return "/web/clients"
-
-
-@router.post("/client/edit", response_class=RedirectResponse, status_code=302)
-async def edit_client(
-        id: Annotated[int, Form()],
-        fio: Annotated[str, Form()],
-        inn: Annotated[str, Form()],
-        phone: Annotated[str, Form()],
-        db: Db = Depends(db_ins)):
-    await db.edit_client(id, fio, inn, phone)
-
-    return "/web/clients"
-
-
 @router.get("/lawyer", response_class=HTMLResponse)
-async def get_client_page(request: Request, db: Db = Depends(db_ins)):
+async def get_lawyer_page(request: Request, db: Db = Depends(db_ins)):
     lawyers = await db.get_lawyers()
 
-    return templates.TemplateResponse("lawyer_page.html", {
+    return templates.TemplateResponse("table_page.html", {
         "request": request,
-        "col": ["id_lawyer", "FIO", "salary"],
-        "colRu": ["id клиента", "ФИО", "Зарплата"],
-        "items": lawyers
+        "col": ["FIO", "salary"],
+        "colRu": ["ФИО", "Зарплата"],
+        "colId": "id_lawyer",
+        "colIdRu": "id юриста",
+        "items": lawyers,
+        "name": "lawyer"
     })
 
 
-@router.post("/client/add", response_class=RedirectResponse, status_code=302)
-async def add_client(fio: Annotated[str, Form()],
-                     inn: Annotated[str, Form()],
-                     phone: Annotated[str, Form()],
+@router.post("/lawyer/add", response_class=RedirectResponse, status_code=302)
+async def add_lawyer(FIO: Annotated[str, Form()],
+                     salary: Annotated[str, Form()],
                      db: Db = Depends(db_ins)):
-    await db.add_client(fio, inn, phone)
+    await db.add_lawyer(FIO, salary)
 
-    return "/web/clients"
+    return "/web/lawyer"
 
 
-@router.post("/dell/client/{id_client}", response_class=RedirectResponse, status_code=302)
-async def dell_client(id_client: int,
+@router.post("/lawyer/dell/{id}", response_class=RedirectResponse, status_code=302)
+async def dell_lawyer(id: int,
                       db: Db = Depends(db_ins)):
-    await db.dell_client(id_client)
+    await db.dell_lawyer(id)
 
-    return "/web/clients"
+    return "/web/lawyer"
 
 
-@router.post("/client/edit", response_class=RedirectResponse, status_code=302)
-async def edit_client(
+@router.post("/lawyer/edit", response_class=RedirectResponse, status_code=302)
+async def edit_lawyer(
         id: Annotated[int, Form()],
-        fio: Annotated[str, Form()],
-        inn: Annotated[str, Form()],
-        phone: Annotated[str, Form()],
+        FIO: Annotated[str, Form()],
+        salary: Annotated[str, Form()],
         db: Db = Depends(db_ins)):
-    await db.edit_client(id, fio, inn, phone)
+    await db.edit_lawyer(id, FIO, salary)
 
-    return "/web/clients"
+    return "/web/lawyer"

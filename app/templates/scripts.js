@@ -14,7 +14,7 @@ const postData = async (url = '', data = {}) => {
 }
 
 function dell(id, name){
-    postData('/web/dell/'+name+'/'+id)
+    postData('/web/'+name+'/dell/'+id)
       .then((data) => {
         console.log(data);
       });
