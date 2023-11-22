@@ -11,10 +11,17 @@
     <title>main screen</title>
 </head>
 <body>
-<div class="text-center">
-    <a href="/web/" class="btn btn-primary">
-        <img src="{{ url_for('static', path='img/backwardarrow.png') }}" height="30" alt="Back">
-    </a>
+<div class="row">
+    <div class="col-sm">
+        <a href="/web/" class="btn btn-primary">
+            <img src="{{ url_for('static', path='img/backwardarrow.png') }}" height="30" alt="Back">
+        </a>
+    </div>
+    <div class="col-sm">
+        <button class="btn btn-primary btn-search">
+            <img src="{{ url_for('static', path='img/find.png') }}" height="30" alt="Find">
+        </button>
+    </div>
 </div>
 
 <div class="container">
@@ -24,18 +31,25 @@
             <th scope="col">
                 <img src="{{ url_for('static', path='img/dell.png') }}" alt="My Profile" height="30">
             </th>
-            <th scope="col">{{colIdRu}}</th>
+
+            <th scope="col">
+                {{colIdRu}}
+                <div class="input-group">
+                    <div class="form-outline" data-mdb-input-init>
+                        <input type="search" id="par-id" class="form-control"/>
+                    </div>
+                </div>
+            </th>
+
             {% for num_col in range(colRu|length) %}
             <th scope="col">
                 {{colRu[num_col]}}
                 <div class="input-group">
                     <div class="form-outline" data-mdb-input-init>
-                        <input type="search" id="form1" class="form-control"/>
+                        <input type="search" id="par-{{col[num_col]}}" class="form-control"/>
                     </div>
                 </div>
             </th>
-
-
             {% endfor %}
             <th scope="col">
                 <img src="{{ url_for('static', path='img/edit.png') }}" alt="My Profile" height="30">
@@ -156,6 +170,15 @@
 </div>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script type="module">
+    $('[data-bs-toggle="tooltip"]').tooltip()
+
+    $(document).on("click", ".btn-search", function () {
+        var id = $(".par-id #id").val();
+        $(".modal-body #id").val( id );
+    });
+</script>
+
 <script type="module">
     $('[data-bs-toggle="tooltip"]').tooltip()
 
