@@ -25,8 +25,17 @@
                 <img src="{{ url_for('static', path='img/dell.png') }}" alt="My Profile" height="30">
             </th>
             <th scope="col">{{colIdRu}}</th>
-            {% for ru in colRu %}
-            <th scope="col">{{ru}}</th>
+            {% for num_col in range(colRu|length) %}
+            <th scope="col">
+                {{colRu[num_col]}}
+                <div class="input-group">
+                    <div class="form-outline" data-mdb-input-init>
+                        <input type="search" id="form1" class="form-control"/>
+                    </div>
+                </div>
+            </th>
+
+
             {% endfor %}
             <th scope="col">
                 <img src="{{ url_for('static', path='img/edit.png') }}" alt="My Profile" height="30">
@@ -126,7 +135,8 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="editGroup-{{col[num_col]}}">{{colRu[num_col]}}</span>
                                     </div>
-                                    <input name="{{col[num_col]}}"  id="{{col[num_col]}}" type="text" class="form-control" aria-label="Default"
+                                    <input name="{{col[num_col]}}" id="{{col[num_col]}}" type="text"
+                                           class="form-control" aria-label="Default"
                                            aria-describedby="inputGroup-sizing-default">
                                 </div>
                                 {% endfor %}
