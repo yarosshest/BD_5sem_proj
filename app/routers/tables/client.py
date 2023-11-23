@@ -68,3 +68,26 @@ async def edit_client(
     await db.edit_client(id, FIO, INN, phone)
 
     return "/web/client"
+
+
+@router.get("/find", response_class=RedirectResponse, status_code=302)
+async def find_client(request: Request,
+        id: Annotated[str, Form()],
+        FIO: Annotated[str, Form()],
+        INN: Annotated[str, Form()],
+        phone: Annotated[str, Form()],
+        db: Db = Depends(db_ins)):
+    clients = await db.get_clients()
+
+    if id != '':
+
+
+    return templates.TemplateResponse("table_page.html", {
+        "request": request,
+        "col": ["FIO", "INN", "phone"],
+        "colRu": ["ФИО", "ИНН", "Телефон"],
+        "colId": "id_client",
+        "colIdRu": "id клиента",
+        "items": clients,
+        "name": "client"
+    })

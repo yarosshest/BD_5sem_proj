@@ -9,5 +9,5 @@ pymupdf
 starlette~=0.27.0
 python-jose
 passlib~=1.7.4
-bcrypt
 asyncmy
+cryptography
