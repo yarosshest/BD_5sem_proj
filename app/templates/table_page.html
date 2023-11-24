@@ -179,12 +179,14 @@
         var id = $("#par-id").val();
 
         {% for c in col %}
+        var {{c}} = "";
         var {{c}} = $("#par-{{c}}").val();
         {% endfor %}
 
         $.post('find', {
+        "id": id,
         {% for c in col %}
-            "{{c}}" : {{c}},
+        "{{c}}" : {{c}},
         {% endfor %}
         }, function() {
             alert( "success" );

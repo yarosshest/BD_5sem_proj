@@ -70,17 +70,20 @@ async def edit_client(
     return "/web/client"
 
 
-@router.get("/find", response_class=RedirectResponse, status_code=302)
+@router.post("/find", response_class=HTMLResponse)
 async def find_client(request: Request,
-        id: Annotated[str, Form()],
-        FIO: Annotated[str, Form()],
-        INN: Annotated[str, Form()],
-        phone: Annotated[str, Form()],
-        db: Db = Depends(db_ins)):
+                      id: Annotated[str, Form()],
+                      FIO: Annotated[str, Form()],
+                      INN: Annotated[str, Form()],
+                      phone: Annotated[str, Form()],
+                      db: Db = Depends(db_ins)):
     clients = await db.get_clients()
+    res = []
 
     if id != '':
-
+        for d in clients:
+            if id in str(d.id_client):
+                res.append(d)
 
     return templates.TemplateResponse("table_page.html", {
         "request": request,
@@ -88,6 +91,6 @@ async def find_client(request: Request,
         "colRu": ["ФИО", "ИНН", "Телефон"],
         "colId": "id_client",
         "colIdRu": "id клиента",
-        "items": clients,
+        "items": res,
         "name": "client"
     })
