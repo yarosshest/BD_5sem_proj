@@ -183,14 +183,18 @@
         var {{c}} = $("#par-{{c}}").val();
         {% endfor %}
 
-        $.post('find', {
-        "id": id,
+        var data = '';
+
+        var loc = window.location;
+
+
+        data = data +  'id=' + id;
+
         {% for c in col %}
-        "{{c}}" : {{c}},
+        data = data +  '&{{c}}=' + {{c}};
         {% endfor %}
-        }, function() {
-            alert( "success" );
-            });
+
+        window.location = loc.origin +"/web/{{name}}/"  + 'find?' + data;
     });
 </script>
 

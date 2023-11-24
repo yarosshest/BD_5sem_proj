@@ -1,23 +1,18 @@
-import os
-from datetime import timedelta, datetime
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi import Request, Form
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import HTMLResponse
 from starlette.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 
-from app.models.Message import Message
-from database.Db_objects import Client
 from database.async_db import DataBase as Db
 from database.async_db import db as db_ins
 
 router = APIRouter(
     prefix="/client",
     tags=["client"],
-
 )
 
 script_dir = Path(__file__).parent.parent.parent.joinpath("templates/")
@@ -70,20 +65,29 @@ async def edit_client(
     return "/web/client"
 
 
-@router.post("/find", response_class=HTMLResponse)
+@router.get("/find", response_class=HTMLResponse)
 async def find_client(request: Request,
-                      id: Annotated[str, Form()],
-                      FIO: Annotated[str, Form()],
-                      INN: Annotated[str, Form()],
-                      phone: Annotated[str, Form()],
+                      id: str,
+                      FIO: str,
+                      INN: str,
+                      phone: str,
                       db: Db = Depends(db_ins)):
     clients = await db.get_clients()
     res = []
 
-    if id != '':
-        for d in clients:
-            if id in str(d.id_client):
-                res.append(d)
+    for c in clients:
+        if FIO is not "":
+            if FIO in c.FIO and c not in res:
+                res.append(c)
+        if INN is not "":
+            if INN in c.INN and c not in res:
+                res.append(c)
+        if phone is not "" and c not in res:
+            if phone in c.phone:
+                res.append(c)
+        if id is not "" and c not in res:
+            if id in str(c.id_client):
+                res.append(c)
 
     return templates.TemplateResponse("table_page.html", {
         "request": request,

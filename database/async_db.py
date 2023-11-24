@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from database.Db_objects import Base, Client, Lawyer
+from database.Db_objects import Base, Client, Lawyer, PaymentStatus, Payment
 
 meta = MetaData()
 
@@ -120,7 +120,7 @@ class DataBase:
             await session.commit()
             await session.close()
 
-    async def get_lawyers(self) -> List[dict]:
+    async def get_lawyers(self) -> List[Lawyer]:
         session = await self.get_session()
         try:
             q = select(Lawyer)
@@ -128,7 +128,7 @@ class DataBase:
             res = []
             for i in lawyers:
                 session.expunge(i)
-                res.append(i.__dict__)
+                res.append(i)
             return res
         finally:
             await session.close()
@@ -168,6 +168,113 @@ class DataBase:
             else:
                 item.FIO = fio
                 item.salary = salary
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_paymentStatuses(self) -> List[PaymentStatus]:
+        session = await self.get_session()
+        try:
+            q = select(PaymentStatus)
+            paymentStatuses = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in paymentStatuses:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_paymentStatus(self, status: str):
+        session = await self.get_session()
+        try:
+            paymentStatus = PaymentStatus(status=status)
+            session.add(paymentStatus)
+        finally:
+            await session.commit()
+            await session.close()
+
+
+    async def dell_paymentStatus(self, id_payment_status: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(PaymentStatus).where(PaymentStatus.id_payment_status == id_payment_status)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_paymentStatus(self, id: int, status: str) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(PaymentStatus).where(PaymentStatus.id_payment_status == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.status = status
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+
+    async def get_payments(self) -> List[Payment]:
+        session = await self.get_session()
+        try:
+            q = select(Payment)
+            payments = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in payments:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_payment(self, amount: str, id_payment_status: int):
+        session = await self.get_session()
+        try:
+            payment = Payment(amount=amount, id_payment_status=id_payment_status)
+            session.add(payment)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_payment(self, id_payment: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Payment).where(Payment.id_payment == id_payment)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_payment(self, id: int, amount: str, id_payment_status: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Payment).where(Payment.id_payment == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.amount = amount
+                item.id_payment_status = id_payment_status
                 return True
         finally:
             await session.commit()
