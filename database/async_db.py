@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from database.Db_objects import Base, Client, Lawyer, PaymentStatus, Payment
+from database.Db_objects import Base, Client, Lawyer, PaymentStatus, Payment, ContractStatus, Contract
 
 meta = MetaData()
 
@@ -195,7 +195,6 @@ class DataBase:
             await session.commit()
             await session.close()
 
-
     async def dell_paymentStatus(self, id_payment_status: int) -> bool:
         session = await self.get_session()
         try:
@@ -225,7 +224,6 @@ class DataBase:
         finally:
             await session.commit()
             await session.close()
-
 
     async def get_payments(self) -> List[Payment]:
         session = await self.get_session()
@@ -275,6 +273,111 @@ class DataBase:
             else:
                 item.amount = amount
                 item.id_payment_status = id_payment_status
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_contractStatuses(self) -> List[ContractStatus]:
+        session = await self.get_session()
+        try:
+            q = select(ContractStatus)
+            contractStatus = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in contractStatus:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_contractStatus(self, status: str):
+        session = await self.get_session()
+        try:
+            contractStatus = ContractStatus(status=status)
+            session.add(contractStatus)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_contractStatus(self, id_contract_status: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ContractStatus).where(ContractStatus.id_contract_status == id_contract_status)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_contractStatus(self, id: int, status: str) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ContractStatus).where(ContractStatus.id_contract_status == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.status = status
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_contracts(self) -> List[Contract]:
+        session = await self.get_session()
+        try:
+            q = select(Contract)
+            contracts = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in contracts:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_contract(self, link: str, id_contract_status: int):
+        session = await self.get_session()
+        try:
+            contract = Contract(link=link, id_contract_status=id_contract_status)
+            session.add(contract)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_contract(self, id_contract: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Contract).where(Contract.id_contract == id_contract)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_contract(self, id: int, link: str, id_contract_status: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Contract).where(Contract.id_contract == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.link = link
+                item.id_contract_status = id_contract_status
                 return True
         finally:
             await session.commit()

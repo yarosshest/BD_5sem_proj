@@ -6,6 +6,9 @@ from starlette.templating import Jinja2Templates
 from app.routers.tables.client import router as client
 from app.routers.tables.lawyer import router as lawyer
 from app.routers.tables.paymentStatus import router as paymentStatus
+from app.routers.tables.payment import router as payment
+from app.routers.tables.contractStatus import router as contractStatus
+from app.routers.tables.contract import router as contract
 
 from pathlib import Path
 
@@ -17,6 +20,9 @@ router = APIRouter(
 router.include_router(client)
 router.include_router(lawyer)
 router.include_router(paymentStatus)
+router.include_router(payment)
+router.include_router(contractStatus)
+router.include_router(contract)
 
 
 script_dir = Path(__file__).parent.parent.joinpath("templates/")
