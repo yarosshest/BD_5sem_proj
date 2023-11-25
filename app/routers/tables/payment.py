@@ -66,6 +66,7 @@ async def edit_payment(
 @router.get("/find", response_class=RedirectResponse, status_code=302)
 async def filter_payment(
         request: Request,
+        id: str,
         amount: str,
         id_payment_status: str,
         db: Db = Depends(db_ins)):
@@ -74,6 +75,8 @@ async def filter_payment(
     res = []
 
     for payment in payments:
+        if id != "" and id in str(payment.id_payment) and payment not in res:
+            res.append(payment)
         if amount != "" and amount in str(payment.amount) and payment not in res:
             res.append(payment)
         if id_payment_status != "" and id_payment_status in str(payment.id_payment_status)and payment not in res:

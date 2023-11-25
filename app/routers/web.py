@@ -9,6 +9,9 @@ from app.routers.tables.paymentStatus import router as paymentStatus
 from app.routers.tables.payment import router as payment
 from app.routers.tables.contractStatus import router as contractStatus
 from app.routers.tables.contract import router as contract
+from app.routers.tables.requestStatus import router as requestStatus
+from app.routers.tables.request import router as request
+from app.routers.tables.productionStatus import router as productionStatus
 
 from pathlib import Path
 
@@ -23,6 +26,10 @@ router.include_router(paymentStatus)
 router.include_router(payment)
 router.include_router(contractStatus)
 router.include_router(contract)
+router.include_router(requestStatus)
+router.include_router(request)
+router.include_router(productionStatus)
+
 
 
 script_dir = Path(__file__).parent.parent.joinpath("templates/")

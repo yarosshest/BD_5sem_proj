@@ -12,7 +12,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from database.Db_objects import Base, Client, Lawyer, PaymentStatus, Payment, ContractStatus, Contract
+from database.Db_objects import Base, Client, Lawyer, PaymentStatus, Payment, ContractStatus, Contract, RequestStatus, \
+    Request, ProductionStatus
 
 meta = MetaData()
 
@@ -383,6 +384,168 @@ class DataBase:
             await session.commit()
             await session.close()
 
+    async def get_requestStatuses(self) -> List[RequestStatus]:
+        session = await self.get_session()
+        try:
+            q = select(RequestStatus)
+            requestStatus = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in requestStatus:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_requestStatus(self, status: str):
+        session = await self.get_session()
+        try:
+            requestStatus = RequestStatus(status=status)
+            session.add(requestStatus)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_requestStatus(self, id_request_status: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(RequestStatus).where(RequestStatus.id_request_status == id_request_status)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_requestStatus(self, id: int, status: str) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(RequestStatus).where(RequestStatus.id_request_status == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.status = status
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_requests(self) -> List[Request]:
+        session = await self.get_session()
+        try:
+            q = select(Request)
+            requests = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in requests:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_request(self, id_client: int, id_lawyer: int, id_payment: int, id_contract: int,
+                          id_request_status: int):
+        session = await self.get_session()
+        try:
+            request = Request(id_client=id_client, id_lawyer=id_lawyer, id_payment=id_payment, id_contract=id_contract,
+                              id_request_status=id_request_status)
+            session.add(request)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_request(self, id_request: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Request).where(Request.id_request == id_request)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_request(self, id: int, id_client: int, id_lawyer: int, id_payment: int, id_contract: int,
+                           id_request_status: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Request).where(Request.id_request == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.id_client = id_client
+                item.id_lawyer = id_lawyer
+                item.id_payment = id_payment
+                item.id_contract = id_contract
+                item.id_request_status = id_request_status
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_ProductionStatuses(self) -> List[ProductionStatus]:
+        session = await self.get_session()
+        try:
+            q = select(ProductionStatus)
+            ProductionStatus = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in ProductionStatus:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_ProductionStatus(self, status: str):
+        session = await self.get_session()
+        try:
+            ProductionStatus = ProductionStatus(status=status)
+            session.add(ProductionStatus)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_ProductionStatus(self, id_Production_status: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ProductionStatus).where(ProductionStatus.id_Production_status == id_Production_status)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_ProductionStatus(self, id: int, status: str) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ProductionStatus).where(ProductionStatus.id_Production_status == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.status = status
+                return True
+        finally:
+            await session.commit()
+            await session.close()
 
 db = DataBase()
 
