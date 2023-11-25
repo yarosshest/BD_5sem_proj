@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from database.Db_objects import Base, Client, Lawyer, PaymentStatus, Payment, ContractStatus, Contract, RequestStatus, \
-    Request, ProductionStatus
+    Request, ProductionStatus, ProductionSheet
 
 meta = MetaData()
 
@@ -499,9 +499,9 @@ class DataBase:
         session = await self.get_session()
         try:
             q = select(ProductionStatus)
-            ProductionStatus = (await session.execute(q)).scalars().unique().fetchall()
+            productionStatus = (await session.execute(q)).scalars().unique().fetchall()
             res = []
-            for i in ProductionStatus:
+            for i in productionStatus:
                 session.expunge(i)
                 res.append(i)
             return res
@@ -511,8 +511,8 @@ class DataBase:
     async def add_ProductionStatus(self, status: str):
         session = await self.get_session()
         try:
-            ProductionStatus = ProductionStatus(status=status)
-            session.add(ProductionStatus)
+            productionStatus = ProductionStatus(status=status)
+            session.add(productionStatus)
         finally:
             await session.commit()
             await session.close()
@@ -520,7 +520,7 @@ class DataBase:
     async def dell_ProductionStatus(self, id_Production_status: int) -> bool:
         session = await self.get_session()
         try:
-            q = select(ProductionStatus).where(ProductionStatus.id_Production_status == id_Production_status)
+            q = select(ProductionStatus).where(ProductionStatus.id_production_status == id_Production_status)
             result = await session.execute(q)
             item = result.scalars().unique().first()
             if item is None:
@@ -535,13 +535,67 @@ class DataBase:
     async def edit_ProductionStatus(self, id: int, status: str) -> bool:
         session = await self.get_session()
         try:
-            q = select(ProductionStatus).where(ProductionStatus.id_Production_status == id)
+            q = select(ProductionStatus).where(ProductionStatus.id_production_status == id)
             result = await session.execute(q)
             item = result.scalars().unique().first()
             if item is None:
                 return False
             else:
                 item.status = status
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_ProductionSheets(self) -> List[ProductionSheet]:
+        session = await self.get_session()
+        try:
+            q = select(ProductionSheet)
+            productionSheet = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in productionSheet:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_ProductionSheet(self, name: str, id_production_status: int, request_id: int):
+        session = await self.get_session()
+        try:
+            productionSheet = ProductionSheet(name=name, id_production_status=id_production_status, request_id=request_id)
+            session.add(ProductionSheet)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_ProductionSheet(self, id_Production_sheet: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ProductionSheet).where(ProductionSheet.id_production_sheet == id_Production_sheet)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_ProductionSheet(self, id: int, name: str, id_production_status: int, request_id: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ProductionSheet).where(ProductionSheet.id_production_sheet == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.name = name
+                item.id_production_status = id_production_status
+                item.request_id = request_id
                 return True
         finally:
             await session.commit()

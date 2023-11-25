@@ -12,6 +12,7 @@ from app.routers.tables.contract import router as contract
 from app.routers.tables.requestStatus import router as requestStatus
 from app.routers.tables.request import router as request
 from app.routers.tables.productionStatus import router as productionStatus
+from app.routers.tables.productionSheet import router as productionSheet
 
 from pathlib import Path
 
@@ -29,6 +30,7 @@ router.include_router(contract)
 router.include_router(requestStatus)
 router.include_router(request)
 router.include_router(productionStatus)
+router.include_router(productionSheet)
 
 
 
