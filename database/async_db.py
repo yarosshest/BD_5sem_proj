@@ -13,7 +13,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from database.Db_objects import Base, Client, Lawyer, PaymentStatus, Payment, ContractStatus, Contract, RequestStatus, \
-    Request, ProductionStatus, ProductionSheet
+    Request, ProductionStatus, ProductionSheet, Competence, Brewer, Parameter, EquipmentParameters, Equipment, \
+    ProductionStep
 
 meta = MetaData()
 
@@ -560,11 +561,12 @@ class DataBase:
         finally:
             await session.close()
 
-    async def add_ProductionSheet(self, name: str, id_production_status: int, request_id: int):
+    async def add_ProductionSheet(self, name: str, id_production_status: int, id_request: int):
         session = await self.get_session()
         try:
-            productionSheet = ProductionSheet(name=name, id_production_status=id_production_status, request_id=request_id)
-            session.add(ProductionSheet)
+            productionSheet = ProductionSheet(name=name, id_production_status=id_production_status,
+                                              id_request=id_request)
+            session.add(productionSheet)
         finally:
             await session.commit()
             await session.close()
@@ -584,7 +586,7 @@ class DataBase:
             await session.commit()
             await session.close()
 
-    async def edit_ProductionSheet(self, id: int, name: str, id_production_status: int, request_id: int) -> bool:
+    async def edit_ProductionSheet(self, id: int, name: str, id_production_status: int, id_request: int) -> bool:
         session = await self.get_session()
         try:
             q = select(ProductionSheet).where(ProductionSheet.id_production_sheet == id)
@@ -595,11 +597,346 @@ class DataBase:
             else:
                 item.name = name
                 item.id_production_status = id_production_status
-                item.request_id = request_id
+                item.id_request = id_request
                 return True
         finally:
             await session.commit()
             await session.close()
+
+    async def get_competences(self):
+        session = await self.get_session()
+        try:
+            q = select(Competence)
+            competences = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in competences:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_competence(self, name: str):
+        session = await self.get_session()
+        try:
+            competence = Competence(name=name)
+            session.add(competence)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_competence(self, id_competence: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Competence).where(Competence.id_competence == id_competence)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_competence(self, id: int, name: str) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Competence).where(Competence.id_competence == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.name = name
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_brewers(self):
+        session = await self.get_session()
+        try:
+            q = select(Brewer)
+            breweries = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in breweries:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_brewer(self, FIO: str, salary: int, id_competence: int):
+        session = await self.get_session()
+        try:
+            brewery = Brewer(FIO=FIO, salary=salary, id_competence=id_competence)
+            session.add(brewery)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_brewer(self, id_brewery: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Brewer).where(Brewer.id_brewer == id_brewery)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_brewer(self, id: int, FIO: str, salary: int, id_competence: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Brewer).where(Brewer.id_brewer == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.FIO = FIO
+                item.salary = salary
+                item.id_competence = id_competence
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_parameters(self):
+        session = await self.get_session()
+        try:
+            q = select(Parameter)
+            parameters = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in parameters:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+
+    async def add_parameter(self, name: str):
+        session = await self.get_session()
+        try:
+            parameter = Parameter(name=name)
+            session.add(parameter)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_parameter(self, id_parameter: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Parameter).where(Parameter.id_parameter == id_parameter)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_parameter(self, id: int, name: str) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Parameter).where(Parameter.id_parameter == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.name = name
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_equipment_parameters(self):
+        session = await self.get_session()
+        try:
+            q = select(EquipmentParameters)
+            equipment_parameters = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in equipment_parameters:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_equipment_parameters(self, id_equipment: int, id_parameter: int):
+        session = await self.get_session()
+        try:
+            equipment_parameters = EquipmentParameters(id_equipment=id_equipment,
+                                                       id_parameter=id_parameter)
+            session.add(equipment_parameters)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_equipment_parameters(self, id_equipment_parameters: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(EquipmentParameters).where(EquipmentParameters.id_equipment_parameters == id_equipment_parameters)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_equipment_parameters(self, id: int, id_equipment: int, id_parameter: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(EquipmentParameters).where(EquipmentParameters.id_equipment_parameters == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+                item.id_equipment = id_equipment
+                item.id_parameter = id_parameter
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+
+    async def get_equipment(self):
+        session = await self.get_session()
+        try:
+            q = select(Equipment)
+            equipment = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in equipment:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_equipment(self, name: str, resource: str):
+        session = await self.get_session()
+        try:
+            equipment = Equipment(name=name, resource=resource)
+            session.add(equipment)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_equipment(self, id_equipment: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Equipment).where(Equipment.id_equipment == id_equipment)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_equipment(self, id: int, name: str, resource: str) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Equipment).where(Equipment.id_equipment == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+
+                item.name = name
+                item.resource = resource
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+
+    async def get_production_step(self):
+        session = await self.get_session()
+        try:
+            q = select(ProductionStep)
+            production_step = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in production_step:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_production_step(self, data_time: str, log: str, id_equipment: int, id_brewer: int):
+        session = await self.get_session()
+        try:
+            production_step = ProductionStep(data_time=data_time, log=log, id_equipment=id_equipment, id_brewer=id_brewer)
+            session.add(production_step)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_production_step(self, id_production_step: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ProductionStep).where(ProductionStep.id_production_step == id_production_step)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_production_step(self, id: int, data_time: str, log: str, id_equipment: int, id_brewer: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ProductionStep).where(ProductionStep.id_production_step == id)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+
+                item.data_time = data_time
+                item.log = log
+                item.id_equipment = id_equipment
+                item.id_brewer = id_brewer
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+            
+
+
+
+
+
+
 
 db = DataBase()
 

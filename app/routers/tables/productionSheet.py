@@ -25,7 +25,7 @@ async def get_productionSheet_page(request: Request, db: Db = Depends(db_ins)):
 
     return templates.TemplateResponse("table_page.html", {
         "request": request,
-        "col": ["name", "id_production_status", "request_id"],
+        "col": ["name", "id_production_status", "id_request"],
         "colRu": ["Название", "Статус", "Заявка"],
         "colId": "id_production_sheet",
         "colIdRu": "id листа производства",
@@ -55,7 +55,7 @@ async def find_requestStatus(
         id: str,
         name: str,
         id_production_status: str,
-        request_id: str,
+        id_request: str,
         db: Db = Depends(db_ins)):
     requestStatuses = await db.get_ProductionSheets()
     res = []
@@ -67,7 +67,7 @@ async def find_requestStatus(
             res.append(requestStatus)
         elif id_production_status != "" and str(requestStatus.id_production_status) == id_production_status:
             res.append(requestStatus)
-        elif request_id != "" and str(requestStatus.request_id) == request_id:
+        elif id_request != "" and str(requestStatus.id_request) == id_request:
             res.append(requestStatus)
 
     return templates.TemplateResponse("table_page.html", {

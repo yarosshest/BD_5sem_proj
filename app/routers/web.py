@@ -13,6 +13,12 @@ from app.routers.tables.requestStatus import router as requestStatus
 from app.routers.tables.request import router as request
 from app.routers.tables.productionStatus import router as productionStatus
 from app.routers.tables.productionSheet import router as productionSheet
+from app.routers.tables.competence import router as competence
+from app.routers.tables.brewer import router as brewer
+from app.routers.tables.parameter import router as parameter
+from app.routers.tables.equipmentParameters import router as equipmentParameters
+from app.routers.tables.equipment import router as equipment
+from app.routers.tables.productionStep import router as productionStep
 
 from pathlib import Path
 
@@ -31,8 +37,12 @@ router.include_router(requestStatus)
 router.include_router(request)
 router.include_router(productionStatus)
 router.include_router(productionSheet)
-
-
+router.include_router(competence)
+router.include_router(brewer)
+router.include_router(parameter)
+router.include_router(equipmentParameters)
+router.include_router(equipment)
+router.include_router(productionStep)
 
 script_dir = Path(__file__).parent.parent.joinpath("templates/")
 
