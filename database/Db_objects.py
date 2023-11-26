@@ -145,7 +145,7 @@ class ProductionStepsInSheet(Base):
     __tablename__ = 'Production_steps_in_sheet'
     id_production_steps_in_sheet: Mapped[int] = mapped_column(primary_key=True)
     id_production_sheet: Mapped[int] = mapped_column(ForeignKey("Production_sheet.id_production_sheet"))
-    production_steps: Mapped[List["ProductionStep"]] = mapped_column(ForeignKey("ProductionStep.id_production_step"))
+    id_production_step: Mapped[int] = mapped_column(ForeignKey("Production_step.id_production_step"))
 
 
 class Spoilage(Base):

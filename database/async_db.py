@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from database.Db_objects import Base, Client, Lawyer, PaymentStatus, Payment, ContractStatus, Contract, RequestStatus, \
     Request, ProductionStatus, ProductionSheet, Competence, Brewer, Parameter, EquipmentParameters, Equipment, \
-    ProductionStep
+    ProductionStep, Spoilage, ProductionStepsInSheet
 
 meta = MetaData()
 
@@ -722,7 +722,6 @@ class DataBase:
         finally:
             await session.close()
 
-
     async def add_parameter(self, name: str):
         session = await self.get_session()
         try:
@@ -788,7 +787,8 @@ class DataBase:
     async def dell_equipment_parameters(self, id_equipment_parameters: int) -> bool:
         session = await self.get_session()
         try:
-            q = select(EquipmentParameters).where(EquipmentParameters.id_equipment_parameters == id_equipment_parameters)
+            q = select(EquipmentParameters).where(
+                EquipmentParameters.id_equipment_parameters == id_equipment_parameters)
             result = await session.execute(q)
             item = result.scalars().unique().first()
             if item is None:
@@ -816,7 +816,6 @@ class DataBase:
         finally:
             await session.commit()
             await session.close()
-
 
     async def get_equipment(self):
         session = await self.get_session()
@@ -873,7 +872,6 @@ class DataBase:
             await session.commit()
             await session.close()
 
-
     async def get_production_step(self):
         session = await self.get_session()
         try:
@@ -890,7 +888,8 @@ class DataBase:
     async def add_production_step(self, data_time: str, log: str, id_equipment: int, id_brewer: int):
         session = await self.get_session()
         try:
-            production_step = ProductionStep(data_time=data_time, log=log, id_equipment=id_equipment, id_brewer=id_brewer)
+            production_step = ProductionStep(data_time=data_time, log=log, id_equipment=id_equipment,
+                                             id_brewer=id_brewer)
             session.add(production_step)
         finally:
             await session.commit()
@@ -930,12 +929,119 @@ class DataBase:
         finally:
             await session.commit()
             await session.close()
-            
 
+    async def get_spoilage(self):
+        session = await self.get_session()
+        try:
+            q = select(Spoilage)
+            spoilage = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in spoilage:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
 
+    async def add_spoilage(self, amount: str, item: str, id_production_step: int):
+        session = await self.get_session()
+        try:
+            spoilage = Spoilage(amount=amount, item=item, id_production_step=id_production_step)
+            session.add(spoilage)
+        finally:
+            await session.commit()
+            await session.close()
 
+    async def dell_spoilage(self, id_spoilage: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Spoilage).where(Spoilage.id_spoilage == id_spoilage)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
 
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
 
+    async def edit_spoilage(self, id: int, amount: str, item: str, id_production_step: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(Spoilage).where(Spoilage.id_spoilage == id)
+            result = await session.execute(q)
+            spoilage = result.scalars().unique().first()
+            if spoilage is None:
+                return False
+            else:
+
+                spoilage.amount = amount
+                spoilage.item = item
+                spoilage.id_production_step = id_production_step
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def get_production_steps_in_sheet(self):
+        session = await self.get_session()
+        try:
+            q = select(ProductionStepsInSheet)
+            production_step = (await session.execute(q)).scalars().unique().fetchall()
+            res = []
+            for i in production_step:
+                session.expunge(i)
+                res.append(i)
+            return res
+        finally:
+            await session.close()
+
+    async def add_production_steps_in_sheet(self, id_production_sheet: int, id_production_step: int):
+        session = await self.get_session()
+        try:
+            production_step = ProductionStepsInSheet(id_production_sheet=id_production_sheet,
+                                                     id_production_step=id_production_step)
+            session.add(production_step)
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def dell_production_steps_in_sheet(self, id_production_steps_in_sheet: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ProductionStepsInSheet).where(
+                ProductionStepsInSheet.id_production_steps_in_sheet == id_production_steps_in_sheet)
+            result = await session.execute(q)
+            item = result.scalars().unique().first()
+            if item is None:
+                return False
+            else:
+
+                await session.delete(item)
+                return True
+        finally:
+            await session.commit()
+            await session.close()
+
+    async def edit_production_steps_in_sheet(self, id: int, id_production_sheet: int, id_production_step: int) -> bool:
+        session = await self.get_session()
+        try:
+            q = select(ProductionStepsInSheet).where(ProductionStepsInSheet.id_production_steps_in_sheet == id)
+            result = await session.execute(q)
+            production_step = result.scalars().unique().first()
+            if production_step is None:
+                return False
+            else:
+
+                production_step.id_production_sheet = id_production_sheet
+                production_step.id_production_step = id_production_step
+                return True
+        finally:
+            await session.commit()
+            await session.close()
 
 
 db = DataBase()

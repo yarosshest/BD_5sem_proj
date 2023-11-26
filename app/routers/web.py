@@ -19,6 +19,8 @@ from app.routers.tables.parameter import router as parameter
 from app.routers.tables.equipmentParameters import router as equipmentParameters
 from app.routers.tables.equipment import router as equipment
 from app.routers.tables.productionStep import router as productionStep
+from app.routers.tables.spoilage import router as spoilage
+from app.routers.tables.productionStepsInSheet import router as productionStepsInSheet
 
 from pathlib import Path
 
@@ -43,6 +45,8 @@ router.include_router(parameter)
 router.include_router(equipmentParameters)
 router.include_router(equipment)
 router.include_router(productionStep)
+router.include_router(spoilage)
+router.include_router(productionStepsInSheet)
 
 script_dir = Path(__file__).parent.parent.joinpath("templates/")
 
