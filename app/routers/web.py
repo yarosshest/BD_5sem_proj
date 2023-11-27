@@ -21,6 +21,9 @@ from app.routers.tables.equipment import router as equipment
 from app.routers.tables.productionStep import router as productionStep
 from app.routers.tables.spoilage import router as spoilage
 from app.routers.tables.productionStepsInSheet import router as productionStepsInSheet
+from app.routers.procedures.getColUnderLimit import router as getColUnderLimit
+from app.routers.procedures.statisticForSolige import router as statisticForSolige
+from app.routers.functions.calculateTotalPayment import router as calculateTotalPayment
 
 from pathlib import Path
 
@@ -47,6 +50,10 @@ router.include_router(equipment)
 router.include_router(productionStep)
 router.include_router(spoilage)
 router.include_router(productionStepsInSheet)
+router.include_router(getColUnderLimit)
+router.include_router(statisticForSolige)
+router.include_router(calculateTotalPayment)
+
 
 script_dir = Path(__file__).parent.parent.joinpath("templates/")
 

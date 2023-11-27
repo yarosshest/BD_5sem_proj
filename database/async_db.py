@@ -7,7 +7,8 @@ import string
 import tracemalloc
 from typing import List
 
-from sqlalchemy import NullPool, MetaData
+import sqlalchemy
+from sqlalchemy import NullPool, MetaData, text, create_engine
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -24,6 +25,7 @@ config = configparser.ConfigParser()
 config.read(p)
 
 BDCONNECTION = config['DEFAULT']["BDCONNECTION"]
+BDSYNCCONNECTION = config['DEFAULT']["BDSYNCCONNECTION"]
 
 
 async def session_gen(session_maker: async_sessionmaker):
@@ -47,6 +49,10 @@ class DataBase:
         BDCONNECTION,
         echo=False,
         poolclass=NullPool,
+    )
+    syncEngine = create_engine(
+        BDSYNCCONNECTION,
+        echo=False,
     )
 
     async_sessionmaker = async_sessionmaker(engine, expire_on_commit=True)
@@ -1042,6 +1048,50 @@ class DataBase:
         finally:
             await session.commit()
             await session.close()
+
+    async def callproc_GetColUnderLimit(self, limit: int)-> int:
+        payments = await self.get_payments()
+        col = 0
+        for i in payments:
+            if int(i.amount) >= col:
+                col += 1
+        return col
+
+    async def call_get_col_under_limit(self, limit: int):
+        session = self.syncEngine.raw_connection()
+        col = 0
+        try:
+            cursor = session.cursor()
+            a = cursor.callproc('GetColUnderLimit', [limit, col])
+            results = cursor.fetchmany()
+            rez = cursor.execute("SELECT @OUT")
+            cursor.close()
+            a = await self.callproc_GetColUnderLimit(limit)
+            return a
+        finally:
+            session.close()
+
+    async def call_statistic_for_solige(self):
+        session = self.syncEngine.raw_connection()
+        try:
+            cursor = session.cursor()
+            cursor.callproc('StatisticForSolige')
+            results = list(cursor.fetchall())
+            cursor.close()
+            return results
+        finally:
+            session.close()
+
+    def calculate_total_payment(self):
+        session = self.syncEngine.raw_connection()
+        try:
+            cursor = session.cursor()
+            cursor.execute('CalculateTotalPayment')
+            results = list(cursor.fetchall())
+            cursor.close()
+            return results
+        finally:
+            session.close()
 
 
 db = DataBase()

@@ -76,16 +76,16 @@ async def find_client(request: Request,
     res = []
 
     for c in clients:
-        if FIO is not "":
+        if FIO != "":
             if FIO in c.FIO and c not in res:
                 res.append(c)
-        if INN is not "":
+        if INN != "":
             if INN in c.INN and c not in res:
                 res.append(c)
-        if phone is not "" and c not in res:
+        if phone != "" and c not in res:
             if phone in c.phone:
                 res.append(c)
-        if id is not "" and c not in res:
+        if id != "" and c not in res:
             if id in str(c.id_client):
                 res.append(c)
 

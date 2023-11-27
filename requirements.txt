@@ -11,3 +11,4 @@ python-jose
 passlib~=1.7.4
 asyncmy
 cryptography
+pymysql
