@@ -24,6 +24,7 @@ from app.routers.tables.productionStepsInSheet import router as productionStepsI
 from app.routers.procedures.getColUnderLimit import router as getColUnderLimit
 from app.routers.procedures.statisticForSolige import router as statisticForSolige
 from app.routers.functions.calculateTotalPayment import router as calculateTotalPayment
+from app.routers.functions.getTupePayment import router as getTupePayment
 
 from pathlib import Path
 
@@ -53,6 +54,7 @@ router.include_router(productionStepsInSheet)
 router.include_router(getColUnderLimit)
 router.include_router(statisticForSolige)
 router.include_router(calculateTotalPayment)
+router.include_router(getTupePayment)
 
 
 script_dir = Path(__file__).parent.parent.joinpath("templates/")

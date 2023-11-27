@@ -1082,16 +1082,28 @@ class DataBase:
         finally:
             session.close()
 
-    def calculate_total_payment(self):
-        session = self.syncEngine.raw_connection()
+    async def calculate_total_payment(self):
+        payments = await self.get_payments()
+        sum = 0
+        for i in payments:
+            sum += int(i.amount)
+        return sum
+
+    async def get_tupe_payment(self, id):
+        session = await self.get_session()
         try:
-            cursor = session.cursor()
-            cursor.execute('CalculateTotalPayment')
-            results = list(cursor.fetchall())
-            cursor.close()
-            return results
+            q = select(Payment).where(Payment.id_payment == id)
+            result = await session.execute(q)
+
+            payment = result.scalars().unique().first()
+            q = select(PaymentStatus).where(PaymentStatus.id_payment_status == payment.id_payment_status)
+            result = await session.execute(q)
+            paymentStatus = result.scalars().unique().first()
+            return paymentStatus.status
         finally:
-            session.close()
+            await session.commit()
+            await session.close()
+
 
 
 db = DataBase()
